@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    let activeEffect;
+    let bucket = new Set() 
+    function effect(fn) {
+      activeEffect = fn
+      fn()
+    }
+    let obj = new Proxy({},{
+      get(target,key) {
+        console.log('触发get')
+        if(activeEffect) {
+          console.log('桶里存值')
+          bucket.add(activeEffect)
+        }
+        return target[key]
+      },
+      set(target,key, newVal) {
+        console.log('触发set')
+        target[key] = newVal;
+        bucket.forEach(item => item())
+        return true
+      }
+    })
+    obj.text = '111'
+    effect(() => {document.body.innerText = obj.text})
+
+    setTimeout(()=>{obj.text = '2222' },2000)
+
+  </script>
+</body>
+</html>
