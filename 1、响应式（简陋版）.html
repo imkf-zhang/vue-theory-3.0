@@ -34,6 +34,8 @@
 
     setTimeout(()=>{obj.text = '2222' },2000)
 
+     setTimeout(()=>{obj.tt = '2222' },3000) // 设置了一个新key，导致了桶里的副作用函数被触发
+
   </script>
 </body>
 </html>
