@@ -17,7 +17,7 @@
       get(target,key) {
         console.log('触发get')
         if(activeEffect) {
-          console.log('桶里存值')
+          // console.log('桶里存值')
           bucket.add(activeEffect)
         }
         return target[key]
@@ -35,6 +35,12 @@
     setTimeout(()=>{obj.text = '2222' },2000)
 
      setTimeout(()=>{obj.tt = '2222' },3000) // 设置了一个新key，导致了桶里的副作用函数被触发
+
+    // 控制台打印: 后两次为设置tt属性时导致副作用函数执行了
+    //触发set
+    //触发get
+    //触发set
+   // 触发get
 
   </script>
 </body>
