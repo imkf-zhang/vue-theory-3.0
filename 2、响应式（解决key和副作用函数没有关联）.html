@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 1、使用weakMap，map，set
+    // 2、作为flg的值也可重新赋值，方便后续操作
+    let activeEffect;
+    let bucket = new WeakMap() // 桶
+    function effect(fn) {
+      activeEffect = fn
+      fn()
+    }
+    let obj = new Proxy({},{
+      get(target,key) {
+        console.log('get触发')
+       if(!activeEffect) return
+       let desMap = bucket.get(target)
+       if(!desMap) {
+        bucket.set(target,(desMap = new Map()))
+       }
+       let desSet = desMap.get(key)
+       if(!desSet) {
+        desMap.set(key,(desSet = new Set()))
+       }
+       desSet.add(activeEffect)
+       return target[key]
+      },
+      set(target,key, newVal) {
+        console.log('set触发')
+        target[key] = newVal;
+        let first = bucket.get(target)
+        if(!first) return
+        const effects = first.get(key)
+        effects && effects.forEach(element => {
+          element()
+        });
+      }
+    })
+    obj.text = '111'
+    effect(() => {document.body.innerText = obj.text})
+
+    setTimeout(()=>{obj.tt = '2222' },2000)
+
+  </script>
+</body>
+</html>
