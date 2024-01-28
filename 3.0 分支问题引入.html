@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 1、使用weakMap，map，set
+    // 2、作为flg的值也可重新赋值，方便后续操作
+    let activeEffect;
+    let bucket = new WeakMap() // 桶
+    function effect(fn) {
+      activeEffect = fn
+      fn()
+    }
+    let obj = new Proxy({},{
+      get(target,key) {
+        // console.log('get触发')
+       if(!activeEffect) return
+       let desMap = bucket.get(target)
+       if(!desMap) {
+        bucket.set(target,(desMap = new Map()))
+       }
+       let desSet = desMap.get(key)
+       if(!desSet) {
+        desMap.set(key,(desSet = new Set()))
+       }
+       desSet.add(activeEffect)
+       return target[key]
+      },
+      set(target,key, newVal) {
+        // console.log('set触发')
+        target[key] = newVal;
+        let first = bucket.get(target)
+        if(!first) return
+        const effects = first.get(key)
+        effects && effects.forEach(element => {
+          element()
+        });
+      }
+    })
+    obj.ok = true
+    obj.text = '111'
+    effect(() => {
+      console.log('副函数执行')
+      document.body.innerText = obj.ok ? obj.text : 'z'
+    })
+
+    obj.ok = false
+    
+    // 关于text的依赖其实还是被收集着，text变化势必因此相关桶的依赖函数执行
+    // 结论也是确实引起了改变
+    setTimeout(()=>{obj.text = '2222' }, 5000)
+
+  </script>
+</body>
+</html>
