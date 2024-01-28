@@ -28,8 +28,40 @@ let setOther2  =  new Set(setOther1)
 console.log(setOther2) // Set(1) { 1 }
 console.log(setOther2 === setOther1) // false
 setOther2.forEach(item => {
+  console.log('item',item)
   setOther1.delete(1)
   setOther1.add(1)
   console.log('foreach ing')
 })
 console.log(setOther1) // Set(1) { 1 }
+
+
+let q = function name(params) {
+  console.log('q')
+}
+let w = function name(params) {
+  console.log('w')
+}
+
+let eSet = new Set()
+eSet.add(q)
+eSet.add(w)
+let ySet = new Set(eSet)
+ySet.forEach(item => {
+  console.log('item->',item)
+  item()
+})
+
+// item-> [Function: name]
+// q
+// item-> [Function: name]
+// w
+
+// 综上看：set new的时候传入领一个set，会自动扁平化？
+ console.log('-------------')
+let set1  =  new Set([1,2,3])
+let set2  =  new Set(set1)
+let set3  =  new Set(set2)
+set3.forEach(item => {
+  console.log(item)
+})
