@@ -68,17 +68,21 @@
         const effects = first.get(key)
         // 解决死循环问题
         const effectsTORUN = new Set(effects)
-        effectsTORUN.forEach(effectFn => effectFn())
+        effectsTORUN.forEach(effectFn => {
+          console.log('打印', effectFn)
+          effectFn()
+        })
         // effects && effects.forEach(element => {element()  });
       }
     })
 
 
 
+    obj.ok = true
     obj.text = '111'
-    effect(() => {document.body.innerText = obj.text})
-
-    setTimeout(()=>{obj.tt = '2222' },2000)
+    effect(() => {document.body.innerText = obj.ok ? obj.text : 'z'})
+    obj.ok = false
+    setTimeout(()=>{obj.text = '2222' }, 5000)
 
   </script>
 </body>
