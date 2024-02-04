@@ -58,6 +58,33 @@ function cleanup (effectFn) {
   }
   effectFn.deps.length = 0
  }
+// function effect(fn, option={}) {
+//   console.log('----执行----')
+//   const effectFn = () => {
+//     console.log('----复函数执行----')
+//     // 调用cleanup函数完成清除工作
+//     cleanup(effectFn)
+//     // 执行的时候将其设置为当前激活的副作用函数
+//     activeEffect = effectFn
+//     fn()
+//   }
+//   effectFn.options = option
+//   // 用来存储所有与该副作用函数相关联的依赖集合
+//   effectFn.deps = []
+//   // 执行副作用函数
+//   if(!option.lazy) {
+//     effectFn()
+//   }
+//   return effectFn
+// }
+
+/**
+ * 
+ * @param {*} fn 郑州的副作用函数 
+ * effectFn为包装后的副作用函数
+ * @param {*} option 
+ * @returns 
+ */
 function effect(fn, option={}) {
   console.log('----执行----')
   const effectFn = () => {
@@ -66,7 +93,10 @@ function effect(fn, option={}) {
     cleanup(effectFn)
     // 执行的时候将其设置为当前激活的副作用函数
     activeEffect = effectFn
-    fn()
+    // FIXME: 改动
+    const res  =   fn()
+    // FIXME: 改动
+    return res
   }
   effectFn.options = option
   // 用来存储所有与该副作用函数相关联的依赖集合
@@ -77,8 +107,29 @@ function effect(fn, option={}) {
   }
   return effectFn
 }
+/**
+ * 把getter作为一个
+ * @param {*} getter 
+ */
+function computed(getter) {
+  const effectFn = effect(getter, {
+    lazy: true
+  })
+  const obj = {
+    // 当读取value时才执行effectFn
+    get value() {
+      return effectFn()
+    }
+  }
+  return obj.value
+}
+const sum = computed(() => obj.foo + obj.bar)
+console.log(sum)
+
+  obj.foo = 15
+  console.log(sum)
 // obj.bar和obj.foo为响应式数据
-const effectFnOther = effect(() => obj.foo + obj.bar, {lazy: true})
+// const effectFnOther = effect(() => obj.foo + obj.bar, {lazy: true})
 // 此时,value就是上述响应式数据的之和
-let value = effectFnOther()
-console.log(value) // undefined
+// let value = effectFnOther()
+// console.log(value) // undefined
