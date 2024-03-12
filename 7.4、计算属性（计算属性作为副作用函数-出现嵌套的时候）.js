@@ -4,36 +4,12 @@ let bucket = new WeakMap() // 桶
 let obj = new Proxy(data,{
   get(target,key) {
     console.log('get 触发')
-   if(!activeEffect) return
-   let desMap = bucket.get(target)
-   if(!desMap) {
-    bucket.set(target,(desMap = new Map()))
-   }
-   let desSet = desMap.get(key)
-   if(!desSet) {
-    desMap.set(key,(desSet = new Set()))
-   }
-   desSet.add(activeEffect)
-   // 添加进去，为后期删除做准备  
-   activeEffect.deps.push(desSet)
+     track(target, key)
    return target[key]
   },
   set(target,key, newVal) {
     target[key] = newVal;
-    let first = bucket.get(target)
-    if(!first) return
-    const effects = first.get(key)
-    // 解决死循环问题
-    const effectsTORUN = new Set(effects)
-    effectsTORUN.forEach(effectFn => 
-      {
-        if (effectFn.options.scheduler) {
-          effectFn.options.scheduler(effectFn)
-        }else {
-          effectFn()
-        }
-      }
-      )
+    trigger(target,key)
   }
 })
 
@@ -50,25 +26,42 @@ function track(obj, key = 'value') {
   desSet.add(activeEffect)
   // 添加进去，为后期删除做准备  
   activeEffect.deps.push(desSet)
-  return obj[key]
 }
 
 function trigger(obj, key = 'value') {
-  obj[key] = newVal;
   let first = bucket.get(obj)
   if(!first) return
   const effects = first.get(key)
+
+   // 解决死循环问题
+   const effectsTORUN = new Set(effects)
+   effectsTORUN.forEach(effectFn => 
+     {
+       if (effectFn.options.scheduler) {
+         effectFn.options.scheduler(effectFn)
+       }else {
+         effectFn()
+       }
+     }
+     )
   // 解决死循环问题
-  const effectsTORUN = new Set(effects)
-  effectsTORUN.forEach(effectFn => 
-    {
-      if (effectFn.options.scheduler) {
-        effectFn.options.scheduler(effectFn)
-      }else {
-        effectFn()
-      }
-    }
-    )
+  // const effectsTORUN = new Set()
+
+  // effects && effects.forEach(effectFn => {
+  //     if(effectFn !==activeEffect) {
+  //       effectsTORUN.add(effectFn)
+  //     }
+  // })
+
+  // effectsTORUN.forEach(effectFn => 
+  //   {
+  //     if (effectFn.options.scheduler) {
+  //       effectFn.options.scheduler(effectFn)
+  //     }else {
+  //       effectFn()
+  //     }
+  //   }
+  //   )
 }
 /**
  * 把和副作用函数相关的依赖给删掉
@@ -110,22 +103,6 @@ function effect(fn, option={}) {
   }
   return effectFn
 }
-// /**
-//  * 把getter作为一个
-//  * @param {*} getter 
-//  */
-// function computed(getter) {
-//   const effectFn = effect(getter, {
-//     lazy: true
-//   })
-//   const obj = {
-//     // 当读取value时才执行effectFn
-//     get value() {
-//       return effectFn()
-//     }
-//   }
-//   return obj
-// }
 function computed(getter) {
 
   let value;
@@ -133,9 +110,9 @@ function computed(getter) {
   const effectFn = effect(getter, {
     lazy: true,
     scheduler() { 
-      // TODO: 改造
      if(!dirty) {
       dirty = true
+      // TODO: 改造
       trigger(obj, 'value')
      }
     }
@@ -147,6 +124,7 @@ function computed(getter) {
         value = effectFn()
         dirty= false
       }
+      // TODO: 改造
       track(obj, 'value')
       return value
     }
@@ -160,5 +138,19 @@ effect(() => {
   console.log(sum.value)
 })
 
+obj.bar = 10
+
 // 计算属性内部有effect，并且是懒执行，只有当真正读取计算属性的值时才会执行
 // 外层在effect并不会被内层的收集
+
+//  改造前打印
+
+// ----执行----
+// ----执行----      
+// ----副函数执行----
+// ----副函数执行----
+// get 触发
+// get 触发
+// 6
+
+// 改造后打印
