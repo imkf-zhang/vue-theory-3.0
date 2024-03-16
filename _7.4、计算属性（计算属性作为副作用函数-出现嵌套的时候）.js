@@ -45,7 +45,13 @@ function trigger(obj, key = 'value') {
         }
        
    })
-   effectsTORUN.forEach(effectFn => effectFn())
+   effectsTORUN.forEach(effectFn => {
+    if(effectFn.options.scheduler) {
+      effectFn.options.scheduler(effectFn)
+    }else {
+      effectFn()
+    }
+   })
 }
 /**
  * 把和副作用函数相关的依赖给删掉
@@ -92,53 +98,29 @@ function effect(fn, option={}) {
 }
 
 function computed(getter) {
-  let value;
-  let dirty = true 
-  const effectFn = effect(getter, {
+  let value
+  let dirty = true
+  const effectFn = effect(getter,{
     lazy: true,
-    scheduler() { 
-     if(!dirty) {
-      dirty = true
-      // TODO: 改造
+    scheduler() {
+      dirty =  true
       trigger(obj, 'value')
-     }
     }
   })
-  const obj = {
-    // 当读取value时才执行effectFn
+  const obj = { 
     get value() {
-      if(dirty) {
-        value = effectFn()
-        dirty= false
-      }
-      // TODO: 改造
-      track(obj, 'value')
-      return value
+     if(dirty) {
+       value =  effectFn()
+       dirty = false
+     }
+     track(obj,'value')
+     return value;
     }
   }
   return obj
 }
-
-
-const sum = computed(() => obj.bar + obj.foo)
+const sum = computed(() => obj.foo + obj.bar)
 effect(() => {
   console.log(sum.value)
 })
-
-obj.bar = 10
-console.log(sum.value)
-
-// 计算属性内部有effect，并且是懒执行，只有当真正读取计算属性的值时才会执行
-// 外层在effect并不会被内层的收集
-
-//  改造前打印
-
-// ----执行----
-// ----执行----      
-// ----副函数执行----
-// ----副函数执行----
-// get 触发
-// get 触发
-// 6
-
-// 改造后打印
+obj.foo++
