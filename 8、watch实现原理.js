@@ -1,3 +1,5 @@
+// watch的本质： 观测一个响应式数据，数据变化是通知并执行回调函数
+
 let data = { foo: 1, bar: 5}
 let activeEffect;
 let bucket = new WeakMap() // 桶
@@ -32,36 +34,22 @@ function trigger(obj, key = 'value') {
   let first = bucket.get(obj)
   if(!first) return
   const effects = first.get(key)
-
-   // 解决死循环问题
-   const effectsTORUN = new Set(effects)
-   effectsTORUN.forEach(effectFn => 
-     {
-       if (effectFn.options.scheduler) {
-         effectFn.options.scheduler(effectFn)
-       }else {
-         effectFn()
-       }
-     }
-     )
   // 解决死循环问题
-  // const effectsTORUN = new Set()
-
-  // effects && effects.forEach(effectFn => {
-  //     if(effectFn !==activeEffect) {
-  //       effectsTORUN.add(effectFn)
-  //     }
-  // })
-
-  // effectsTORUN.forEach(effectFn => 
-  //   {
-  //     if (effectFn.options.scheduler) {
-  //       effectFn.options.scheduler(effectFn)
-  //     }else {
-  //       effectFn()
-  //     }
-  //   }
-  //   )
+  const effectsTORUN = new Set()
+  effects && effects.forEach(effectFn => {
+      if(effectFn !==activeEffect) {
+        effectsTORUN.add(effectFn)
+      }
+  })
+  effectsTORUN.forEach(effectFn => 
+    {
+      if (effectFn.options.scheduler) {
+        effectFn.options.scheduler(effectFn)
+      }else {
+        effectFn()
+      }
+    }
+    )
 }
 /**
  * 把和副作用函数相关的依赖给删掉
@@ -103,54 +91,17 @@ function effect(fn, option={}) {
   }
   return effectFn
 }
-function computed(getter) {
 
-  let value;
-  let dirty = true 
-  const effectFn = effect(getter, {
-    lazy: true,
-    scheduler() { 
-     if(!dirty) {
-      dirty = true
-      // TODO: 改造
-      trigger(obj, 'value')
-     }
-    }
-  })
-  const obj = {
-    // 当读取value时才执行effectFn
-    get value() {
-      if(dirty) {
-        value = effectFn()
-        dirty= false
+
+function watch(source, cb) { 
+  effect(
+    // 触发读取操作，从而建立联系
+    () => { source.foo },
+    {
+      scheduler() {
+        // 当数据变化时，调用回调函数cb
+        cb()
       }
-      // TODO: 改造
-      track(obj, 'value')
-      return value
     }
-  }
-  return obj
-}
-
-
-const sum = computed(() => obj.bar + obj.foo)
-effect(() => {
-  console.log(sum.value)
-})
-
-obj.bar = 10
-
-// 计算属性内部有effect，并且是懒执行，只有当真正读取计算属性的值时才会执行
-// 外层在effect并不会被内层的收集
-
-//  改造前打印
-
-// ----执行----
-// ----执行----      
-// ----副函数执行----
-// ----副函数执行----
-// get 触发
-// get 触发
-// 6
-
-// 改造后打印
+  )
+ }
