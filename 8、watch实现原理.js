@@ -2,12 +2,15 @@
 
 let data = { foo: 1, bar: 5}
 let activeEffect;
+let stack = []
 let bucket = new WeakMap() // 桶
+
+
 let obj = new Proxy(data,{
   get(target,key) {
     console.log('get 触发')
      track(target, key)
-   return target[key]
+     return target[key]
   },
   set(target,key, newVal) {
     target[key] = newVal;
@@ -31,25 +34,26 @@ function track(obj, key = 'value') {
 }
 
 function trigger(obj, key = 'value') {
-  let first = bucket.get(obj)
-  if(!first) return
-  const effects = first.get(key)
-  // 解决死循环问题
-  const effectsTORUN = new Set()
-  effects && effects.forEach(effectFn => {
-      if(effectFn !==activeEffect) {
-        effectsTORUN.add(effectFn)
-      }
-  })
-  effectsTORUN.forEach(effectFn => 
-    {
-      if (effectFn.options.scheduler) {
-        effectFn.options.scheduler(effectFn)
-      }else {
-        effectFn()
-      }
+  let depsMap = bucket.get(obj)
+  if(!depsMap) return
+  const effects = depsMap.get(key)
+
+   // 解决死循环问题
+   const effectsTORUN = new Set()
+
+   effects && effects.forEach(effectFn => {
+     if(effectFn !== activeEffect) {
+         effectsTORUN.add(effectFn)
+        }
+       
+   })
+   effectsTORUN.forEach(effectFn => {
+    if(effectFn.options.scheduler) {
+      effectFn.options.scheduler(effectFn)
+    }else {
+      effectFn()
     }
-    )
+   })
 }
 /**
  * 把和副作用函数相关的依赖给删掉
@@ -79,7 +83,11 @@ function effect(fn, option={}) {
     cleanup(effectFn)
     // 执行的时候将其设置为当前激活的副作用函数
     activeEffect = effectFn
-    const res  =   fn()
+    stack.push(activeEffect)
+    let res = fn()
+    // 执行完之后，弹出栈
+    stack.pop()
+    activeEffect = stack[stack.length -1]
     return res
   }
   effectFn.options = option
@@ -105,3 +113,10 @@ function watch(source, cb) {
     }
   )
  }
+ watch(obj, ()=> {
+  console.log('数据变化了')
+ })
+
+ obj.foo++
+
+ obj.bar++  // 并不会触发“数据变化了”打印
