@@ -1,3 +1,4 @@
+// 完整的计算属性
 let data = { foo: 1, bar: 5}
 let activeEffect;
 let stack = []
