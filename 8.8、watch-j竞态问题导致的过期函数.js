@@ -120,6 +120,7 @@ function ergodicReadObjKeys(params, set = new Set()) {
  * 实现watch依赖那些属性变化时进行响应处理
  * @param {*} source 
  * @param {*} cb 
+ * @param {*} options
  */
 function watch(source, cb, options ={}) { 
   // 做出兼容
@@ -147,7 +148,16 @@ function watch(source, cb, options ={}) {
     () => getter(),
     {
       lazy: true,
-      scheduler: job
+      // FIXME: 这里开始改动
+      scheduler: () => {
+        // 在调度函数中判断flush 是否为'post'，如果是就放到微任务队列中执行
+        if(options.flush === 'post') {
+          const p = Promise.resolve()
+          p.then(job)
+        }else {
+          job()
+        }
+      }
     }
   )
   
@@ -160,18 +170,8 @@ function watch(source, cb, options ={}) {
  
  }
 
-//  watch(obj, ()=> {
-//   console.log('数据变化了')
-//  })
- watch(
-  // getter 函数
-  () => obj.foo,
-  // 回调函数
-  (new1, old) => {
-    console.log('值变了',new1,old)
-  }, {
-    immediate: true
-  }
- )
 
-// 会打印：值变了 1 undefined  此时老值就是没有 --- 只是立马执行了一下而已
+
+ watch(obj, async(newVal, oldVal, oninvalid) => {
+  
+ })
