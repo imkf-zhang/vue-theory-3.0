@@ -134,12 +134,25 @@ function watch(source, cb, options ={}) {
   //定义新值，老值
   let newVal,oldVal
 
+  // FIXME: 改动的地方
+  // cleanup 用来存储用户注册的过期回调
+  let cleanup
+  // 定义onInvalidate函数
+  function onInvalidate(fn) {
+    // 将过期回调存储到cleanup中----【给个啥都不舍得直接用掉，而是选择存一份--哈哈】
+    cleanup = fn
+  }
   // 将scheduler调度函数抽出来为一个单独的函数
   let job = () => {
     // scheduler拿到的是新值
     newVal = effectFn()
+    // FIXME: 改动的地方
+    if(cleanup) {
+      cleanup()
+    }
+
     // 当数据变化时，调用回调函数cb
-    cb(newVal,oldVal)
+    cb(newVal,oldVal,onInvalidate)
     oldVal = newVal
   }
 
@@ -148,7 +161,6 @@ function watch(source, cb, options ={}) {
     () => getter(),
     {
       lazy: true,
-      // FIXME: 这里开始改动
       scheduler: () => {
         // 在调度函数中判断flush 是否为'post'，如果是就放到微任务队列中执行
         if(options.flush === 'post') {
@@ -160,7 +172,7 @@ function watch(source, cb, options ={}) {
       }
     }
   )
-  
+  // 是否立即进行出发副作用函数
   if(options.immediate) {
     job()
   }else {
@@ -172,6 +184,33 @@ function watch(source, cb, options ={}) {
 
 
 
- watch(obj, async(newVal, oldVal, oninvalid) => {
-  
+ watch(obj, async(newVal, oldVal, onInvalid) => {
+  // FIXME: 
+  // 定义一个标志，代表当前副作用函数是否过期，默认是false，没过期
+
+  // TODO:1
+  let expired =  false;
+  // 注册一个过期回调---过期时调用函数，将expired设置为true
+  // TODO:2
+  onInvalid(()=> {
+    expired = true
+  })
+  // 发送网络请求，竞态问题的场景
+  const res = await fetch('/path/to/request')
+  // 只有当该副作用函数执行没有过期时在进行后续的操作
+  // TODO:3
+  if(!expired) {
+    finalData = res
+  }
  })
+
+ obj.foo++  // 1000ms响应
+
+ setTimeout(() => {
+   obj.foo++
+ },200)
+
+//  理解：
+// 执行回调函数之前都会判断cleanup 是否存在，如果存在就会优先执行过期的回调
+// 1、就一个坑位，第一个很慢，咣叽一下占住了，迟迟不结束，别的自然不能用
+// 解释 : expired在1,2,3应用，是不是会造成 cleanup 无法销毁哦？
