@@ -1,5 +1,7 @@
 // watch的本质： 观测一个响应式数据，数据变化是通知并执行回调函数
 
+// 其实还是不太懂为啥那样处理，就可以吧过期的副作用给清楚掉
+
 let data = { foo: 1, bar: 5}
 let activeEffect;
 let stack = []
