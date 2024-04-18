@@ -2,7 +2,7 @@
  * @Author: zhangkaifan 15638452918@163.com
  * @Date: 2024-02-06 19:34:01
  * @LastEditors: zhangkaifan 15638452918@163.com
- * @LastEditTime: 2024-04-17 21:38:15
+ * @LastEditTime: 2024-04-18 09:33:54
  * @FilePath: \vue-theory-3.0\readme.md
  * @Description: 
  * 
@@ -81,7 +81,9 @@ let obj = new Proxy(data,{
 >内部方法具有多态性--相同的内部方法不同的表现，普通对象部署的[[Get]] 和Proxy对象部署的[[Get]]就是不一样的
 
 ## 3、对象的读取其实是比较宽泛的概念
-obj.foo是读取，使用for in 去发现有没有对应的key也是读取
+1、obj.foo是读取
+2、使用for in 去发现有没有对应的key也是读取
+3、使用key in obj也是读取
 
 ## 4、创建代理对象时没有指定对应的拦截函数，例如：没有get() 拦截函数，当通过代理对象访问属性值时
 代理对象的内部方法[[get]]会调用原始对象的内部方法[[Get]]来获取属性值--这就是**代理透明性质**
