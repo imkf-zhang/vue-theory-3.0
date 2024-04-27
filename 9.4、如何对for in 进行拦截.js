@@ -31,9 +31,10 @@ let obj = new Proxy(data,{
   },
   set(target,key,newVal,receiver) {
     console.log('set 触发')
+    // 设置属性值
     const res =  Reflect.set(target,key,newVal,receiver)
-    target[key] = newVal;
     trigger(target, key)
+    return res
   }
 })
 
