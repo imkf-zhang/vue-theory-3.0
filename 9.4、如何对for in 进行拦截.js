@@ -7,7 +7,7 @@ let data = {
 let activeEffect;
 let stack = []
 let bucket = new WeakMap() // 桶
-let ITERATE_KEY = Symbol() // for in 使用ownKeys来拦截，没办法和属性建立链接
+let ITERATE_KEY = Symbol() // FIXME: for in 使用ownKeys来拦截，没办法和属性建立链接
 
 let obj = new Proxy(data,{
   get(target,key, receiver) {
@@ -17,7 +17,7 @@ let obj = new Proxy(data,{
       //  Reflect.get(target, key, receiver)代替之前的 target[key]，关键就是传入了第三个参数receiver---这个就是代理对象。所以访问器属性bar的getter函数内的this指向了代理对象obj
      return Reflect.get(target, key, receiver)
   },
-  //FIXME: 捕捉对in的操作
+  //捕捉对in的操作
   has(target,key) {
     console.log('get 触发')
      track(target, key)
@@ -57,7 +57,7 @@ function trigger(obj, key = 'value') {
   if(!depsMap) return
   // 取得与key相关联的副作用函数
   const effects = depsMap.get(key)
-  // 取得与ITERATE_KEY相关联的副作用函数
+  //FIXME: 取得与ITERATE_KEY相关联的副作用函数
   const iterateEffects = depsMap.get(ITERATE_KEY)
    // 解决死循环问题
    const effectsTORUN = new Set()
