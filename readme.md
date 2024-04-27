@@ -2,7 +2,7 @@
  * @Author: zhangkaifan 15638452918@163.com
  * @Date: 2024-02-06 19:34:01
  * @LastEditors: zhangkaifan 15638452918@163.com
- * @LastEditTime: 2024-04-18 09:33:54
+ * @LastEditTime: 2024-04-27 12:48:30
  * @FilePath: \vue-theory-3.0\readme.md
  * @Description: 
  * 
@@ -87,3 +87,21 @@ let obj = new Proxy(data,{
 
 ## 4、创建代理对象时没有指定对应的拦截函数，例如：没有get() 拦截函数，当通过代理对象访问属性值时
 代理对象的内部方法[[get]]会调用原始对象的内部方法[[Get]]来获取属性值--这就是**代理透明性质**
+
+### 6、一些js的只是
+1、hasOwnProperty 用于判断是对象的自身属性（而不是继承来的属性）中是否具有指定属性
+```javascript
+Object.prototype.hasOwnProperty.call(target , key)  // 返回值true或false
+```
+
+
+
+
+......
+
+##### 过程中写一些日记：
+
+###### 2024.4.27
+
+时常感觉尤工的js之深厚，人家是吧js的内在联系都了解，贯通后，有了框架的输出；
+而是确实在人家的框架的基础上去了解了这些知识---时常自愧不如
