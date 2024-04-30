@@ -2,7 +2,7 @@
  * @Author: zhangkaifan 15638452918@163.com
  * @Date: 2024-02-06 19:34:01
  * @LastEditors: zhangkaifan 15638452918@163.com
- * @LastEditTime: 2024-04-27 12:48:30
+ * @LastEditTime: 2024-04-30 19:02:11
  * @FilePath: \vue-theory-3.0\readme.md
  * @Description: 
  * 
@@ -88,12 +88,23 @@ let obj = new Proxy(data,{
 ## 4、创建代理对象时没有指定对应的拦截函数，例如：没有get() 拦截函数，当通过代理对象访问属性值时
 代理对象的内部方法[[get]]会调用原始对象的内部方法[[Get]]来获取属性值--这就是**代理透明性质**
 
-### 6、一些js的只是
+### 6、一些js的知识
 1、hasOwnProperty 用于判断是对象的自身属性（而不是继承来的属性）中是否具有指定属性
 ```javascript
 Object.prototype.hasOwnProperty.call(target , key)  // 返回值true或false
 ```
+2、如何判断在一个条件里排除NAN的情况
+```javascript
+  if( oldVal !== newVal) {
+     console.log('say hi')
+    }
+// NaN !== NaN  为真值，此时就有问题了
 
+// 所以应该
+  if( oldVal !== newVal && (oldVal === oldVal || newVal === newVal)) {
+     console.log('say hi')
+    }
+```
 
 
 
