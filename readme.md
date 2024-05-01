@@ -2,7 +2,7 @@
  * @Author: zhangkaifan 15638452918@163.com
  * @Date: 2024-02-06 19:34:01
  * @LastEditors: zhangkaifan 15638452918@163.com
- * @LastEditTime: 2024-04-30 19:02:11
+ * @LastEditTime: 2024-05-01 10:17:27
  * @FilePath: \vue-theory-3.0\readme.md
  * @Description: 
  * 
@@ -105,8 +105,10 @@ Object.prototype.hasOwnProperty.call(target , key)  // 返回值true或false
      console.log('say hi')
     }
 ```
-
-
+3、立马执行函数前面写个;避免因为打包导致的一些问题
+```javascript
+;(()=> {console.log('say hi')})()
+```
 
 ......
 
@@ -115,4 +117,4 @@ Object.prototype.hasOwnProperty.call(target , key)  // 返回值true或false
 ###### 2024.4.27
 
 时常感觉尤工的js之深厚，人家是吧js的内在联系都了解，贯通后，有了框架的输出；
-而是确实在人家的框架的基础上去了解了这些知识---时常自愧不如
+而我却是在人家的框架的基础上才去了解了这些知识---时常自愧不如
