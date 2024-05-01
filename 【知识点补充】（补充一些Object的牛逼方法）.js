@@ -2,7 +2,7 @@
  * @Author: zhangkaifan 15638452918@163.com
  * @Date: 2024-04-27 08:27:40
  * @LastEditors: zhangkaifan 15638452918@163.com
- * @LastEditTime: 2024-05-01 10:56:32
+ * @LastEditTime: 2024-05-01 12:55:58
  * @FilePath: \vue-theory-3.0\【知识点补充】（补充一些Object的牛逼方法）.js
  * @Description: 
  * 
@@ -56,7 +56,10 @@ let apple = {}
 let ban = {bar: 1}
 console.log(apple?.bar)
 Object.setPrototypeOf(apple, ban)
-console.log(apple.bar)
+console.log(apple.bar) //1
+apple.bar =2
+console.log(apple.bar) //2
+console.log(ban.bar) // 1
 
 console.log("---object.create---")
 /**
