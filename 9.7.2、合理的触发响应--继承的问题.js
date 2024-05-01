@@ -38,7 +38,7 @@ function reactive (obj) {
        //  当设置的值和老值完全不一样的时候再触发设置
        let oldVal = target[key];
        // FIXME:打印看一下receiver 
-       console.log('set 触发', receiver)
+       console.log('set 触发')
        //  判断是设置值操作，还是添加值操作
        const type = Object.prototype.hasOwnProperty.call(target , key) ? "SET" : "ADD"
        // hasOwnProperty 用于判断是对象的自身属性（而不是继承来的属性）中是否具有指定属性
