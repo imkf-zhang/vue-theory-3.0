@@ -2,7 +2,7 @@
  * @Author: zhangkaifan 15638452918@163.com
  * @Date: 2024-02-06 19:34:01
  * @LastEditors: zhangkaifan 15638452918@163.com
- * @LastEditTime: 2024-05-01 10:17:27
+ * @LastEditTime: 2024-05-02 10:05:10
  * @FilePath: \vue-theory-3.0\readme.md
  * @Description: 
  * 
@@ -108,6 +108,16 @@ Object.prototype.hasOwnProperty.call(target , key)  // 返回值true或false
 3、立马执行函数前面写个;避免因为打包导致的一些问题
 ```javascript
 ;(()=> {console.log('say hi')})()
+```
+4、一个很重要的知识点： 函数嵌套函数，参数是可以隔代空传的，没必要代代都带着
+```javascript
+function createReactive (obj, isShallow = false, isReadonly = false) {
+  set() {
+    if(isReadOnly) {
+      // 一些逻辑处理
+    }
+  }
+}
 ```
 
 ......
