@@ -2,7 +2,7 @@
  * @Author: zhangkaifan 15638452918@163.com
  * @Date: 2024-02-06 19:34:01
  * @LastEditors: zhangkaifan 15638452918@163.com
- * @LastEditTime: 2024-05-02 10:05:10
+ * @LastEditTime: 2024-05-02 10:10:14
  * @FilePath: \vue-theory-3.0\readme.md
  * @Description: 
  * 
@@ -119,6 +119,8 @@ function createReactive (obj, isShallow = false, isReadonly = false) {
   }
 }
 ```
+### 7、对象的深响应浅响应，深只读浅只读
+都是针对get阶段进行深度即可，而深度用的又都是递归
 
 ......
 
