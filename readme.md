@@ -2,7 +2,7 @@
  * @Author: zhangkaifan 15638452918@163.com
  * @Date: 2024-02-06 19:34:01
  * @LastEditors: zhangkaifan 15638452918@163.com
- * @LastEditTime: 2024-05-02 10:10:14
+ * @LastEditTime: 2024-05-03 22:38:03
  * @FilePath: \vue-theory-3.0\readme.md
  * @Description: 
  * 
@@ -122,6 +122,17 @@ function createReactive (obj, isShallow = false, isReadonly = false) {
 ### 7、对象的深响应浅响应，深只读浅只读
 都是针对get阶段进行深度即可，而深度用的又都是递归
 
+## 8、数组
+
+### 数组的特殊性
+```javascript
+let arr = []
+arr[4] = '4'
+console.log(arr[0]) // undefined
+console.log(arr, arr.length) 
+// [ <4 empty items>, '4' ]    5
+```
+
 ......
 
 ##### 过程中写一些日记：
@@ -130,3 +141,7 @@ function createReactive (obj, isShallow = false, isReadonly = false) {
 
 时常感觉尤工的js之深厚，人家是吧js的内在联系都了解，贯通后，有了框架的输出；
 而我却是在人家的框架的基础上才去了解了这些知识---时常自愧不如
+
+###### 20240.5.3
+作为使用者，我不期望对象用一个函数让它变成响应式，而数组又是另一个，作为使用者我就关注
+我把值传给你，你给我变成响应式-----这无疑增加了一个函数的的复杂程度
