@@ -30,7 +30,7 @@ function track(obj, key = 'value') {
  * @param {*} type 增加操作类型传参
  * @return {*}
  */
-function trigger(obj, key = 'value', type) {
+function trigger(obj, key = 'value', type, newVal) {
   let depsMap = bucket.get(obj)
   if(!depsMap) return
   // 取得与key相关联的副作用函数
@@ -65,7 +65,19 @@ function trigger(obj, key = 'value', type) {
       }
     })
   }
-
+  // 如果是数组并且操作的是length属性
+  if(Array.isArray(obj) && key === 'length') {
+    // 将索引大于大于或等于新length的元素，需要把所有相关联的副作用函数取出并添加到effectsTORUN中执行
+    depsMap.forEach((effects, key) => {
+      if(key.length >= newVal) {
+        effects.forEach(effectFn => {
+          if(effectFn !== activeEffect) {
+            effectsTORUN.add(effectFn)
+          }
+        })
+      }
+    })
+  } 
   // 执行函数
    effectsTORUN.forEach(effectFn => {
     if(effectFn.options.scheduler) {
@@ -165,7 +177,7 @@ function createReactive (obj, isShallow = false, isReadonly = false) {
     //  拦截for in 操作  只要for in 触发这里就会知道
     ownKeys(target) {
       // 将副作用函数与ITERATE_KEY关联
-      // FIXME: 是数组的时候，就将响应式关系建立起来
+      // FIXME: for in 循环数组  如果是数组时用length作为key建立响应关系
       track(target, Array.isArray(target) ? 'length' : ITERATE_KEY)
       return Reflect.ownKeys(target)
     },
@@ -190,7 +202,8 @@ function createReactive (obj, isShallow = false, isReadonly = false) {
       if(target === receiver.raw) {
         //  判断设置的值和现在的值不一样的时候再进行trigger  对NaN场景进行兼容
         if( oldVal !== newVal && (oldVal === oldVal || newVal === newVal)) {
-         trigger(target, key, type)
+          //  增加一个参数，newVal，数组设置length时要用该值做后续的处理
+         trigger(target, key, type, newVal)
         }
       }
      
@@ -248,19 +261,34 @@ function shallowRead (obj) {
   return createReactive(obj, true, true)
 }
 
-//    设置的索引值大于当前的数组的length时，会隐式的修改length的属性值，因此也要触发和length
-// 相关的副作用函数的执行
+// 设置的索引值大于当前的数组的length时，会隐式的修改length的属性值，因此也要触发和length，相关的副作用函数的执行
+
+//  当length改变的时候，也会影响到数组，当length为0时，肯定是都给删除了。当length大于当前数据长度的时候肯定是没影响
+
+// 作为使用者，我不期望对象用一个函数让它变成响应式，而数组又是另一个，作为使用者我就关注： 我把值传给你，你给我变成响应式-----这无疑增加了一个函数的的复杂程度
 
 // FIXME: 数组的哪些行为会影响到for in的遍历数组： 1、添加 2、修改数组长度。 本质上都是改变了数组的length
 // 那是不是可以将length属性建立一个响应式
 
+//我们应该尽量避免使用for in 来循环数组，不过语法是能够这样的，所以响应式也要做好for in 循环数组
 const arr =  reactive(['foo'])
 effect(() => {
   for (const key in arr) {
-   console.log(key)
+   console.log('key', key)
   }
 })
 
-arr[2] = 'kate' 
-console.log(arr.length) // 3
-arr.length = 1
+arr[1] = 'kate' 
+arr[5] = 'kate' 
+console.log(arr.length) //  6
+
+// 最后一次打印为：
+// key 0
+// key 1
+// key 5
+
+// FIXME: 当盲目增大数组的length时，length确实会变，但是中间的那些不存在值，各种方法都不会去打印的
+
+// arr.forEach((item,index) => {
+//   console.log("--",item,index)
+// })
