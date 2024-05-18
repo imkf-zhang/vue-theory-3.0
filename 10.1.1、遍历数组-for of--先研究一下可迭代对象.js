@@ -50,3 +50,39 @@ console.log(item.next()) // { value: 3, done: false }
 console.log(item.next()) // { value: 4, done: false }
 console.log(item.next()) // { value: 5, done: false }
 console.log(item.next()) // { value: undefined, done: true }
+
+console.log('0------0')
+
+
+
+const kate = {
+  name: "ke",
+  say() {
+    console.log(this);
+    return "kate";
+  }
+}
+
+let  ke = kate.say()  // { name: 'ke', say: [Function: say] }
+
+
+// 实现一下数组的迭代器
+const array1  = [1,2,3]
+array1[Symbol.iterator] = function() {
+  const target = this;
+  const len = target.length
+  let index = 0
+  return {
+    next() {
+      return {
+        value: index < len ? target[index] : undefined,
+        done: index++ >= len
+      }
+    }
+  }
+}
+const I = array1[Symbol.iterator]()
+console.log(I.next())//{ value: 1, done: false }
+console.log(I.next())//{ value: 2, done: false }
+console.log(I.next())//{ value: 3, done: false }
+console.log(I.next())//{ value: undefined, done: true }
