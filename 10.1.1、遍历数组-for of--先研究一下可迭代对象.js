@@ -20,7 +20,7 @@ try {
 }
 
 // 可以断点一下基本就知道怎么回事了，当打印0的时候, 'value: iteratorObj.value++,'中iteratorObj.value已经是1了
-// 1、先空转一圈读一下 2、正式开始"循环"读，进到next里，++为1，false。打印原始值0  3、接着往下循环，++为2，false，打印原始值2  4、接着往下循环，++3，true，不打印了
+// 1、先空转一圈读一下 2、正式开始"循环"读，进到next里，++为1，false。打印原始值0  3、接着往下循环，++为2，false，打印原始值2  4、接着往下循环，++为3，true，不打印了
 const iteratorObj = {
   value: 0,
   [Symbol.iterator]() {
